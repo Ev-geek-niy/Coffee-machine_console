@@ -1,14 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
 
 namespace Coffee_machine_console;
-
 public static class machineAPI
 {
     private static DB _db = new DB();
     private static int _money = 0;
     private static int _choosedCoffee;
 
-    private static Dictionary<string, int> supplements = new Dictionary<string, int>()
+    private static Dictionary<string, int> _supplements = new Dictionary<string, int>()
     {
         ["milk"] = 0,
         ["sugar"] = 0,
@@ -16,9 +15,10 @@ public static class machineAPI
 
     public static void Run()
     {
-        Console.WriteLine("Добро пожаловать!\nВведите help для показа всех команд\nВведите q, чтобы выйти");
-        CommandListener();
-        Console.WriteLine("Завершение работы");
+        ExecuteOrder(1, _supplements, _money);
+        // Console.WriteLine("Добро пожаловать!\nВведите help для показа всех команд\nВведите q, чтобы выйти");
+        // CommandListener();
+        // Console.WriteLine("Завершение работы");
     }
 
     private static bool CommandListener()
@@ -44,7 +44,7 @@ public static class machineAPI
                     AddInCoffee(args);
                     break;
                 case "ExecuteOrder":
-                    ExecuteOrder();
+                    ExecuteOrder(_choosedCoffee, _supplements, _money);
                     break;
                 case "AddMoney":
                     AddMoney(args);
@@ -67,7 +67,7 @@ public static class machineAPI
 
     public static void GetSupplyKeys()
     {
-        foreach (var x in supplements)
+        foreach (var x in _supplements)
         {
             Console.WriteLine(x.Key);
         }
@@ -75,7 +75,7 @@ public static class machineAPI
     
     public static void GetSupply()
     {
-        foreach (var x in supplements)
+        foreach (var x in _supplements)
         {
             Console.WriteLine($"{x.Key} - {x.Value}");
         }
@@ -115,7 +115,7 @@ public static class machineAPI
 
     private static void CoffeeList()
     {
-        _db.getAllDrinks();
+        _db.GetAllDrinks();
     }
 
     private static void ChooseCoffee(params string[] args)
@@ -123,7 +123,7 @@ public static class machineAPI
         try
         {
             int.TryParse(args[0], out int choice);
-            int count = _db.getDrinkCount();
+            int count = _db.GetDrinkCount();
             if (choice <= 0 || choice > count)
                 Console.WriteLine(
                     "Выбранного напитка не существует\nПосмотреть список напитков можно по команде CoffeeList");
@@ -153,14 +153,14 @@ public static class machineAPI
             {
                 Console.WriteLine("Количество внесенных средств не может быть меньше нуля или равно нулю");
             }
-            else if (!supplements.ContainsKey(supply))
+            else if (!_supplements.ContainsKey(supply))
             {
                 Console.WriteLine("Добавки с таким именем не сущесвует, сейчас доступны: ");
                 GetSupplyKeys();
             }
             else
             {
-                supplements[supply] = value;
+                _supplements[supply] = value;
             }
             GetSupply();
         }
@@ -170,9 +170,9 @@ public static class machineAPI
         }
     }
 
-    private static void ExecuteOrder()
+    private static void ExecuteOrder(int coffeeType, Dictionary<string, int> supplyment, int money)
     {
-        
+        _db.ExecuteOrder(coffeeType, supplyment, money);
     }
 
     private static void AddMoney(string[] args)

@@ -22,12 +22,19 @@ public class QueryBuilder
     public QueryBuilder Select(params string[] cols)
     {
         this._cols = cols;
-        this._sql = string.Concat(new string[]{
-            "SELECT ",
-            string.Join(", ", cols),
-            " FROM ",
-            _table
-        });
+        this._sql = $"SELECT {string.Join(", ", cols)} FROM {_table}";
+        return this;
+    }
+
+    public QueryBuilder Update()
+    {
+        this._sql = $"UPDATE {_table}";
+        return this;
+    }
+
+    public QueryBuilder Set<T>(string col, T value)
+    {
+        this._sql += $" SET {col} = {value}";
         return this;
     }
 
@@ -40,6 +47,12 @@ public class QueryBuilder
     public QueryBuilder Count(string col)
     {
         this._sql = $"SELECT COUNT({col}) FROM {this._table}";
+        return this;
+    }
+
+    public QueryBuilder LeftJoin(string table, string foreignCol, string refCol)
+    {
+        this._sql += $" LEFT JOIN {table} ON {foreignCol} = {refCol}";
         return this;
     }
 
