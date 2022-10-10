@@ -8,6 +8,12 @@ public static class machineAPI
     private static int _money = 0;
     private static int _choosedCoffee;
 
+    private static Dictionary<string, int> supplements = new Dictionary<string, int>()
+    {
+        ["milk"] = 0,
+        ["sugar"] = 0,
+    };
+
     public static void Run()
     {
         Console.WriteLine("Добро пожаловать!\nВведите help для показа всех команд\nВведите q, чтобы выйти");
@@ -56,6 +62,22 @@ public static class machineAPI
                     break;
                 
             }
+        }
+    }
+
+    public static void GetSupplyKeys()
+    {
+        foreach (var x in supplements)
+        {
+            Console.WriteLine(x.Key);
+        }
+    }
+    
+    public static void GetSupply()
+    {
+        foreach (var x in supplements)
+        {
+            Console.WriteLine($"{x.Key} - {x.Value}");
         }
     }
 
@@ -121,9 +143,31 @@ public static class machineAPI
         }
     }
 
-    private static void AddInCoffee(string[] args)
+    private static void AddInCoffee(params string[] args)
     {
-        
+        try
+        {
+            string supply = args[0];
+            int.TryParse(args[1], out int value);
+            if (value <= 0)
+            {
+                Console.WriteLine("Количество внесенных средств не может быть меньше нуля или равно нулю");
+            }
+            else if (!supplements.ContainsKey(supply))
+            {
+                Console.WriteLine("Добавки с таким именем не сущесвует, сейчас доступны: ");
+                GetSupplyKeys();
+            }
+            else
+            {
+                supplements[supply] = value;
+            }
+            GetSupply();
+        }
+        catch (IndexOutOfRangeException e)
+        {
+            Console.WriteLine("Не указаны параметры для добавок");
+        }
     }
 
     private static void ExecuteOrder()
