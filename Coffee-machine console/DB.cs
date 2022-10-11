@@ -1,4 +1,5 @@
 ﻿using System.Data.SqlClient;
+using Coffee_machine_console.Wrappers;
 
 namespace Coffee_machine_console;
 
@@ -20,7 +21,6 @@ public class DB
         {
             QueryBuilder qb = new QueryBuilder();
             string sql = qb.Table("drink")
-                .Select("drink_name", "drink_price")
                 .Where("drink_id", id)
                 .Sql();
             SqlCommand command = new SqlCommand(sql, _connection);
@@ -55,11 +55,11 @@ public class DB
 
             SqlCommand command = new SqlCommand(sql, _connection);
             SqlDataReader reader = command.ExecuteReader();
-            
+
             int i = 0;
             while (reader.Read())
             {
-                drinkList.Add(i, new object[] {reader["drink_id"], reader["drink_name"], reader["drink_price"]});
+                drinkList.Add(i, new object[] { reader["drink_id"], reader["drink_name"], reader["drink_price"] });
                 i++;
             }
 
@@ -76,8 +76,31 @@ public class DB
         }
     }
 
-    public void GetResource(string resourceName)
+    public int GetResource(string resourceName)
     {
+        int value = 0;
+        _connection.Open();
+        try
+        {
+            QueryBuilder qb = new QueryBuilder();
+            string sql = qb.Table("resource").Select("resource_value").Where("resource_name", resourceName).Sql();
+            SqlCommand command = new SqlCommand(sql, _connection);
+            SqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                value = (int)reader["resource_value"];
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        finally
+        {
+            _connection.Close();
+        }
+
+        return value;
     }
 
     public Dictionary<int, int> GetAllResources()
@@ -173,35 +196,15 @@ public class DB
 
     public int ExecuteOrder(int coffeeType, Dictionary<string, int> supplyment, int money)
     {
-        int change = 0;
+        int change = -1;
         try
         {
-            Dictionary<string, int> cost = UnionDictionary(supplyment, GetDrinkRecipe(coffeeType));
-            Dictionary<int, int> resources = GetAllResources();
-            var result = EvalCost(resources, cost);
-
-            int price = (int) GetDrink(coffeeType)["drink_price"];
+            Dictionary<int, int> result = EvalCost(coffeeType, supplyment);
+            int price = (int)GetDrink(coffeeType)["drink_price"];
             change = money - price;
 
-            //TODO: написать касмтомную ошибку (как и на все остальное так-то)
-            if (change < 0)
-                throw new Exception();
-
-            foreach (var i in result)
-            {
-                Console.WriteLine($"{i.Key} - {i.Value}");
-            }
-
-            foreach (KeyValuePair<int, int> pair in result)
-            {
-                if (pair.Value < 0)
-                {
-                    throw new Exception();
-                }
-            }
-            
             _connection.Open();
-            
+
             foreach (var res in result)
             {
                 QueryBuilder qb = new QueryBuilder();
@@ -211,13 +214,14 @@ public class DB
                     .Where("resource_id", res.Key)
                     .Sql();
                 SqlCommand command = new SqlCommand(sql, _connection);
-                int number = command.ExecuteNonQuery();
+                command.ExecuteNonQuery();
             }
-            createLog(coffeeType, price);
+
+            createLog(new LogData(coffeeType, money));
         }
         catch (Exception e)
         {
-            Console.WriteLine("Не хватает ингредиентов, пожалуйста пополните машину");
+            Console.WriteLine(e);
         }
         finally
         {
@@ -227,27 +231,57 @@ public class DB
         return change;
     }
 
-    public void createLog(int drinkID, int price)
+    public bool CheckResources(int coffeeType, Dictionary<string, int> supplyment)
     {
-        
-    }
-
-    public Dictionary<string, int> UnionDictionary(Dictionary<string, int> dict1, Dictionary<string, int> dict2)
-    {
-        foreach (var pair in dict2)
+        foreach (KeyValuePair<int, int> pair in EvalCost(coffeeType, supplyment))
         {
-            if (dict1.ContainsKey(pair.Key))
-                dict1[pair.Key] += pair.Value;
-            else
-                dict1.Add(pair.Key, pair.Value);
+            if (pair.Value < 0)
+            {
+                return false;
+            }
         }
 
-        return dict1;
+        return true;
+    }
+
+    public void createLog(DbData obj)
+    {
+        try
+        {
+            QueryBuilder qb = new QueryBuilder();
+            string sql = qb.Table("log").Insert("log_drink_id", "log_price").Values(obj).Sql();
+            SqlCommand command = new SqlCommand(sql, _connection);
+            command.ExecuteNonQuery();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    private Dictionary<string, int> UnionDictionary(Dictionary<string, int> dict1, Dictionary<string, int> dict2)
+    {
+        Dictionary<string, int> tempDict = dict1.ToDictionary(
+            entry => entry.Key,
+            entry => entry.Value);
+
+        foreach (var pair in dict2)
+        {
+            if (tempDict.ContainsKey(pair.Key))
+                tempDict[pair.Key] += pair.Value;
+            else
+                tempDict.Add(pair.Key, pair.Value);
+        }
+
+        return tempDict;
     }
 
     //TODO: придумать как переписать без хардкода
-    public Dictionary<int, int> EvalCost(Dictionary<int, int> resources, Dictionary<string, int> cost)
+    private Dictionary<int, int> EvalCost(int coffeeType, Dictionary<string, int> supplyment)
     {
+        Dictionary<string, int> cost = UnionDictionary(supplyment, GetDrinkRecipe(coffeeType));
+        Dictionary<int, int> resources = GetAllResources();
+
         resources[1] -= 1;
         resources[2] -= cost["coffee"];
         resources[3] -= cost["water"];

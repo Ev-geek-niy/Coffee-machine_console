@@ -1,15 +1,19 @@
 ﻿using System.Runtime.CompilerServices;
+using Coffee_machine_console.Wrappers;
 
 //TODO: Переписать все ифы на throw Exception;
 
 namespace Coffee_machine_console;
+
 public static class machineAPI
 {
-    private static DB _db = new DB();
-    private static int _money = 0;
-    private static int _choosedCoffee;
-    private static string _order = "";
     private static readonly int[] _currencyValues = new[] { 1, 2, 5, 10, 50, 100, 200 };
+    private static readonly string[] _resourceNames = new[] { "cup", "coffee", "water", "milk", "sugar" };
+    private static readonly DB _db = new DB();
+
+    private static int _money = 0;
+    private static int _choosedCoffee = 0;
+    private static string _order = "";
 
     private static Dictionary<string, int> _supplements = new Dictionary<string, int>()
     {
@@ -17,16 +21,16 @@ public static class machineAPI
         ["sugar"] = 0,
     };
 
-    public static void CreateOrder(string coffeeName)
+    public static void CreateOrder(int drinkNumber)
     {
-        if (_choosedCoffee <= 0)
-            Console.WriteLine("Пожалуйста, выберите напиток\n");
+        string coffeeName = _db.GetDrink(drinkNumber)["drink_name"].ToString();
         _order = $"{coffeeName}";
     }
 
     public static void AddToOrder()
     {
-        foreach (KeyValuePair<string,int> pair in _supplements)
+        CreateOrder(_choosedCoffee);
+        foreach (KeyValuePair<string, int> pair in _supplements)
         {
             if (pair.Key == "milk" && pair.Value != 0)
                 _order += $" плюс {pair.Value} молоко";
@@ -81,24 +85,7 @@ public static class machineAPI
                 default:
                     Console.WriteLine("Такой команды не сущесвует");
                     break;
-                
             }
-        }
-    }
-
-    public static void GetSupplyKeys()
-    {
-        foreach (var x in _supplements)
-        {
-            Console.WriteLine(x.Key);
-        }
-    }
-    
-    public static void GetSupply()
-    {
-        foreach (var x in _supplements)
-        {
-            Console.WriteLine($"{x.Key} - {x.Value}");
         }
     }
 
@@ -112,26 +99,11 @@ public static class machineAPI
         return str.Skip(1).ToArray();
     }
 
-    private static void DegubCommand(string command, string[] args)
-    {
-        Console.WriteLine(command);
-        if (args.Length > 0)
-        {
-            foreach (string arg in args)
-            {
-                Console.Write(arg + " ");
-            }
-            Console.WriteLine();
-        }
-        else
-            Console.WriteLine("No args");
-    }
-
     private static void Help()
     {
         Console.WriteLine("CoffeeList\nAddMoney [money]\nChooseCoffee [coffee number]\n" +
                           "AddInCoffee [sugar/milk] [count]\nExecuteOrder\nResourceAmount [resource name]\n" +
-                          "FillResource [resource name] [value]\n");
+                          "FillResource [resource name] [value]");
     }
 
     private static void CoffeeList()
@@ -155,8 +127,7 @@ public static class machineAPI
             else
             {
                 _choosedCoffee = choice;
-                string coffeeName = _db.GetDrink(_choosedCoffee)["drink_name"].ToString();
-                CreateOrder(coffeeName);
+                CreateOrder(_choosedCoffee);
                 Console.WriteLine($"Ваш заказ: {_order}");
             }
         }
@@ -176,18 +147,21 @@ public static class machineAPI
         {
             string supply = args[0];
             int.TryParse(args[1], out int value);
-            if (value <= 0)
+            if (_choosedCoffee <= 0)
             {
-                Console.WriteLine("Количество внесенных средств не может быть меньше нуля или равно нулю");
+                Console.WriteLine("Не выбран кофе");
+            }
+            else if (value <= 0)
+            {
+                Console.WriteLine("Нельзя добавить нулевое или отрицательное значение");
             }
             else if (!_supplements.ContainsKey(supply))
             {
                 Console.WriteLine("Добавки с таким именем не сущесвует, сейчас доступны: ");
-                GetSupplyKeys();
             }
             else
             {
-                _supplements[supply] += value;
+                _supplements[supply] += value * 100;
                 AddToOrder();
                 Console.WriteLine($"Ваш заказ: {_order}");
             }
@@ -200,15 +174,23 @@ public static class machineAPI
 
     private static void ExecuteOrder(int coffeeType, Dictionary<string, int> supplyment, int money)
     {
-        int change = _db.ExecuteOrder(coffeeType, supplyment, money);
-        if (change >= 0)
+        try
         {
-            Console.WriteLine($"Выдал: {_order}");
-            Console.WriteLine($"На счету: {change} рублей");
+            if (coffeeType == 0)
+                throw new Exception("Не выбран кофе");
+            if (money - (int)_db.GetDrink(coffeeType)["drink_price"] < 0)
+                throw new Exception("Не хватает денек");
+            if (!_db.CheckResources(coffeeType, supplyment))
+                throw new Exception("Не хватает ресов");
+
+            int bill = _db.ExecuteOrder(coffeeType, supplyment, money);
+            _money = bill;
+            Console.WriteLine($"Выдано: {_order}");
+            Console.WriteLine($"На счету: {_money} рублей");
         }
-        else
+        catch (Exception e)
         {
-            Console.WriteLine($"Не хватает {-change} рублей");
+            Console.WriteLine(e.Message);
         }
     }
 
@@ -231,13 +213,28 @@ public static class machineAPI
         Console.WriteLine($"На счету: {_money} рублей");
     }
 
-    private static void ResourceAmount(string[] args)
+    private static void ResourceAmount(params string[] args)
     {
-        
+        string resourceName = args[0];
+        try
+        {
+            if (!_resourceNames.Contains(resourceName))
+                throw new Exception("Такой ресурса нет в базе");
+
+            int value = _db.GetResource(resourceName);
+            double convertedValue = value / 100.0;
+            if (convertedValue == 0)
+                Console.WriteLine($"Количество {resourceName}: {convertedValue} литров");
+            else
+                Console.WriteLine($"{resourceName} закончился");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
 
     private static void FillResource(string[] args)
     {
-        
     }
 }

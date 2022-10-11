@@ -1,4 +1,6 @@
-﻿namespace Coffee_machine_console;
+﻿using Coffee_machine_console.Wrappers;
+
+namespace Coffee_machine_console;
 
 public class QueryBuilder
 {
@@ -32,6 +34,18 @@ public class QueryBuilder
         return this;
     }
 
+    public QueryBuilder Insert(params string[] cols)
+    {
+        this._sql = $"INSERT INTO {_table} ({string.Join(", ", cols)})";
+        return this;
+    }
+
+    public QueryBuilder Values(DbData obj)
+    {
+        this._sql += $" VALUES ({obj.getValuesSql()})";
+        return this;
+    }
+
     public QueryBuilder Set<T>(string col, T value)
     {
         this._sql += $" SET {col} = {value}";
@@ -58,7 +72,7 @@ public class QueryBuilder
 
     public QueryBuilder Where<T>(string col, T value)
     {
-        this._sql += $" WHERE {col} = {value}";
+        this._sql += $" WHERE {col} = '{value}'";
         return this;
     }
 
