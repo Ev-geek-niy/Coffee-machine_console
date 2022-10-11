@@ -7,6 +7,8 @@ public class DB
 {
     private string _dbParams = "Server=localhost;Database=Coffee_machine;Integrated Security=True";
     private SqlConnection? _connection;
+    private int maxResValue = 1000;
+
 
     public DB()
     {
@@ -217,7 +219,7 @@ public class DB
                 command.ExecuteNonQuery();
             }
 
-            createLog(new LogData(coffeeType, money));
+            CreateLog(new LogData(coffeeType, money));
         }
         catch (Exception e)
         {
@@ -244,7 +246,7 @@ public class DB
         return true;
     }
 
-    public void createLog(DbData obj)
+    public void CreateLog(DbData obj)
     {
         try
         {
@@ -256,6 +258,31 @@ public class DB
         catch (Exception e)
         {
             Console.WriteLine(e);
+        }
+    }
+
+    public void FillResource(string resourceName)
+    {
+        _connection.Open();
+        try
+        {
+            QueryBuilder qb = new QueryBuilder();
+            string sql = qb.Table("resource")
+                .Update()
+                .Set("resource_value", this.maxResValue)
+                .Where("resource_name", resourceName)
+                .Sql();
+            Console.WriteLine(sql);
+            SqlCommand command = new SqlCommand(sql, _connection);
+            command.ExecuteNonQuery();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        finally
+        {
+            _connection.Close();
         }
     }
 

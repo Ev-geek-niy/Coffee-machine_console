@@ -141,15 +141,23 @@ public static class machineAPI
         }
     }
 
+    //TODO: переписать на throw
     private static void AddInCoffee(params string[] args)
     {
         try
         {
             string supply = args[0];
             int.TryParse(args[1], out int value);
+            
+            int supplyValue = _db.GetResource(supply);
+            
             if (_choosedCoffee <= 0)
             {
                 Console.WriteLine("Не выбран кофе");
+            }
+            else if (supplyValue - value < 0)
+            {
+                Console.WriteLine($"{supply} закончился");
             }
             else if (value <= 0)
             {
@@ -223,7 +231,7 @@ public static class machineAPI
 
             int value = _db.GetResource(resourceName);
             double convertedValue = value / 100.0;
-            if (convertedValue == 0)
+            if (convertedValue != 0)
                 Console.WriteLine($"Количество {resourceName}: {convertedValue} литров");
             else
                 Console.WriteLine($"{resourceName} закончился");
@@ -236,5 +244,17 @@ public static class machineAPI
 
     private static void FillResource(string[] args)
     {
+        string resourceName = args[0];
+        try
+        {
+            if (!_resourceNames.Contains(resourceName))
+                throw new Exception("Такого ресурса нет в таблице");
+            _db.FillResource(resourceName);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 }

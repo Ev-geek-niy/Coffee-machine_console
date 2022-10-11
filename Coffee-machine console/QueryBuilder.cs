@@ -48,7 +48,7 @@ public class QueryBuilder
 
     public QueryBuilder Set<T>(string col, T value)
     {
-        this._sql += $" SET {col} = {value}";
+        this._sql += $" SET {col} = '{value}'";
         return this;
     }
 
