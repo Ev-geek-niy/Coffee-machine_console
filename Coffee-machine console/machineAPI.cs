@@ -9,10 +9,11 @@ public static class machineAPI
     private static int _money = 0;
     private static int _choosedCoffee;
     private static string _order = "";
+    private static readonly int[] _currencyValues = new[] { 1, 2, 5, 10, 50, 100, 200 };
 
     private static Dictionary<string, int> _supplements = new Dictionary<string, int>()
     {
-        ["milk"] = 1,
+        ["milk"] = 0,
         ["sugar"] = 0,
     };
 
@@ -36,10 +37,9 @@ public static class machineAPI
 
     public static void Run()
     {
-        ExecuteOrder(1, _supplements, _money);
-        // Console.WriteLine("Добро пожаловать!\nВведите help для показа всех команд\nВведите q, чтобы выйти");
-        // CommandListener();
-        // Console.WriteLine("Завершение работы");
+        Console.WriteLine("Добро пожаловать!\nВведите help для показа всех команд\nВведите q, чтобы выйти");
+        CommandListener();
+        Console.WriteLine("Завершение работы");
     }
 
     private static bool CommandListener()
@@ -157,7 +157,7 @@ public static class machineAPI
                 _choosedCoffee = choice;
                 string coffeeName = _db.GetDrink(_choosedCoffee)["drink_name"].ToString();
                 CreateOrder(coffeeName);
-                Console.WriteLine($"Ваш заказ: _order");
+                Console.WriteLine($"Ваш заказ: {_order}");
             }
         }
         catch (IndexOutOfRangeException e)
@@ -187,10 +187,10 @@ public static class machineAPI
             }
             else
             {
-                _supplements[supply] = value;
+                _supplements[supply] += value;
+                AddToOrder();
+                Console.WriteLine($"Ваш заказ: {_order}");
             }
-            AddToOrder();
-            Console.WriteLine($"Ваш заказ: {_order}");
         }
         catch (IndexOutOfRangeException e)
         {
@@ -215,8 +215,15 @@ public static class machineAPI
     private static void AddMoney(string[] args)
     {
         int.TryParse(args[0], out var money);
-        _money += money;
-        GetBill();
+        if (_currencyValues.Contains(money))
+        {
+            _money += money;
+            GetBill();
+        }
+        else
+        {
+            Console.WriteLine("Валюты такого номинала не существует");
+        }
     }
 
     private static void GetBill()
