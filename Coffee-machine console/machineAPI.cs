@@ -15,6 +15,12 @@ public static class machineAPI
     private static int _choosedCoffee = 0;
     private static string _order = "";
 
+    private static readonly Dictionary<string, string[]> _resourceTypes = new Dictionary<string, string[]>()
+    {
+        ["литров"] = new []{"milk", "water"},
+        ["кг"] = new []{"coffee", "sugar"},
+        ["штук"] = new []{"cup"},
+    };
     private static Dictionary<string, int> _supplements = new Dictionary<string, int>()
     {
         ["milk"] = 0,
@@ -37,6 +43,17 @@ public static class machineAPI
             if (pair.Key == "sugar" && pair.Value != 0)
                 _order += $" плюс {pair.Value} сахар";
         }
+    }
+
+    public static string GetResType(string resourceName)
+    {
+        foreach (var resourceType in _resourceTypes)
+        {
+            if (resourceType.Value.Contains(resourceName))
+                return resourceType.Key;
+        }
+
+        return "";
     }
 
     public static void Run()
@@ -148,20 +165,20 @@ public static class machineAPI
         {
             string supply = args[0];
             int.TryParse(args[1], out int value);
-            
+
             int supplyValue = _db.GetResource(supply);
-            
+
             if (_choosedCoffee <= 0)
             {
                 Console.WriteLine("Не выбран кофе");
             }
-            else if (supplyValue - value < 0)
-            {
-                Console.WriteLine($"{supply} закончился");
-            }
             else if (value <= 0)
             {
                 Console.WriteLine("Нельзя добавить нулевое или отрицательное значение");
+            }
+            else if (supplyValue - value < 0)
+            {
+                Console.WriteLine($"{supply} недостаточно");
             }
             else if (!_supplements.ContainsKey(supply))
             {
@@ -230,9 +247,10 @@ public static class machineAPI
                 throw new Exception("Такой ресурса нет в базе");
 
             int value = _db.GetResource(resourceName);
+            string resType = GetResType(resourceName);
             double convertedValue = value / 100.0;
             if (convertedValue != 0)
-                Console.WriteLine($"Количество {resourceName}: {convertedValue} литров");
+                Console.WriteLine($"Количество {resourceName}: {convertedValue} {resType}");
             else
                 Console.WriteLine($"{resourceName} закончился");
         }
@@ -249,6 +267,7 @@ public static class machineAPI
         {
             if (!_resourceNames.Contains(resourceName))
                 throw new Exception("Такого ресурса нет в таблице");
+
             _db.FillResource(resourceName);
         }
         catch (Exception e)
