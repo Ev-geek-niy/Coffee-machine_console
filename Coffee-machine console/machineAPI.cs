@@ -248,7 +248,7 @@ public static class machineAPI
 
             int value = _db.GetResource(resourceName);
             string resType = GetResType(resourceName);
-            double convertedValue = value / 100.0;
+            double convertedValue = resourceName == "cup" ? value : value / 100.0;
             if (convertedValue != 0)
                 Console.WriteLine($"Количество {resourceName}: {convertedValue} {resType}");
             else
