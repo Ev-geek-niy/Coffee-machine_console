@@ -1,5 +1,4 @@
 ﻿using System.Data.SqlClient;
-using System.Numerics;
 
 namespace Coffee_machine_console;
 
@@ -13,8 +12,41 @@ public class DB
         _connection = new SqlConnection(_dbParams);
     }
 
-    public void GetAllDrinks()
+    public Dictionary<string, object> GetDrink(int id)
     {
+        Dictionary<string, object> drinkItem = new Dictionary<string, object>();
+        _connection.Open();
+        try
+        {
+            QueryBuilder qb = new QueryBuilder();
+            string sql = qb.Table("drink")
+                .Select("drink_name", "drink_price")
+                .Where("drink_id", id)
+                .Sql();
+            SqlCommand command = new SqlCommand(sql, _connection);
+            SqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                drinkItem.Add("drink_name", reader["drink_name"]);
+                drinkItem.Add("drink_price", reader["drink_price"]);
+            }
+
+            return drinkItem;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        finally
+        {
+            _connection.Close();
+        }
+    }
+
+    public Dictionary<int, object[]> GetAllDrinks()
+    {
+        Dictionary<int, object[]> drinkList = new Dictionary<int, object[]>();
         _connection.Open();
         try
         {
@@ -23,17 +55,15 @@ public class DB
 
             SqlCommand command = new SqlCommand(sql, _connection);
             SqlDataReader reader = command.ExecuteReader();
+            
+            int i = 0;
             while (reader.Read())
             {
-                var id = reader.GetValue(0);
-                var name = reader.GetValue(1);
-                var price = reader.GetValue(2);
-
-                //TODO: Добавить return
-                //Переписать функция получения всех напитков не должна ничего выводить в консоль
-                //Она должна возвращать скорее всего словарь, с сопоставлением, а вывод на консоль уже API
-                Console.WriteLine($"{id} - {name} цена: {price} рублей");
+                drinkList.Add(i, new object[] {reader["drink_id"], reader["drink_name"], reader["drink_price"]});
+                i++;
             }
+
+            return drinkList;
         }
         catch (Exception e)
         {
@@ -141,16 +171,37 @@ public class DB
         return null;
     }
 
-    public void ExecuteOrder(int coffeeType, Dictionary<string, int> supplyment, int money)
+    public int ExecuteOrder(int coffeeType, Dictionary<string, int> supplyment, int money)
     {
+        int change = 0;
         try
         {
-            Dictionary<string, int> cost = GetDrinkRecipe(coffeeType);
-            cost = UnionDictionary(supplyment, cost);
-            var resources = GetAllResources();
+            Dictionary<string, int> cost = UnionDictionary(supplyment, GetDrinkRecipe(coffeeType));
+            Dictionary<int, int> resources = GetAllResources();
             var result = EvalCost(resources, cost);
+
+            int price = (int) GetDrink(coffeeType)["drink_price"];
+            change = money - price;
+
+            //TODO: написать касмтомную ошибку (как и на все остальное так-то)
+            if (change < 0)
+                throw new Exception();
+
+            foreach (var i in result)
+            {
+                Console.WriteLine($"{i.Key} - {i.Value}");
+            }
+
+            foreach (KeyValuePair<int, int> pair in result)
+            {
+                if (pair.Value < 0)
+                {
+                    throw new Exception();
+                }
+            }
             
             _connection.Open();
+            
             foreach (var res in result)
             {
                 QueryBuilder qb = new QueryBuilder();
@@ -162,15 +213,23 @@ public class DB
                 SqlCommand command = new SqlCommand(sql, _connection);
                 int number = command.ExecuteNonQuery();
             }
+            createLog(coffeeType, price);
         }
-        catch (SqlException e)
+        catch (Exception e)
         {
-            Console.WriteLine("Не хватает Ингредиент , пожалуйста пополните машину");
+            Console.WriteLine("Не хватает ингредиентов, пожалуйста пополните машину");
         }
         finally
         {
             _connection.Close();
         }
+
+        return change;
+    }
+
+    public void createLog(int drinkID, int price)
+    {
+        
     }
 
     public Dictionary<string, int> UnionDictionary(Dictionary<string, int> dict1, Dictionary<string, int> dict2)
@@ -186,6 +245,7 @@ public class DB
         return dict1;
     }
 
+    //TODO: придумать как переписать без хардкода
     public Dictionary<int, int> EvalCost(Dictionary<int, int> resources, Dictionary<string, int> cost)
     {
         resources[1] -= 1;

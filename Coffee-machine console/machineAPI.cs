@@ -1,17 +1,38 @@
 ﻿using System.Runtime.CompilerServices;
 
+//TODO: Переписать все ифы на throw Exception;
+
 namespace Coffee_machine_console;
 public static class machineAPI
 {
     private static DB _db = new DB();
     private static int _money = 0;
     private static int _choosedCoffee;
+    private static string _order = "";
 
     private static Dictionary<string, int> _supplements = new Dictionary<string, int>()
     {
-        ["milk"] = 0,
+        ["milk"] = 1,
         ["sugar"] = 0,
     };
+
+    public static void CreateOrder(string coffeeName)
+    {
+        if (_choosedCoffee <= 0)
+            Console.WriteLine("Пожалуйста, выберите напиток\n");
+        _order = $"{coffeeName}";
+    }
+
+    public static void AddToOrder()
+    {
+        foreach (KeyValuePair<string,int> pair in _supplements)
+        {
+            if (pair.Key == "milk" && pair.Value != 0)
+                _order += $" плюс {pair.Value} молоко";
+            if (pair.Key == "sugar" && pair.Value != 0)
+                _order += $" плюс {pair.Value} сахар";
+        }
+    }
 
     public static void Run()
     {
@@ -115,7 +136,11 @@ public static class machineAPI
 
     private static void CoffeeList()
     {
-        _db.GetAllDrinks();
+        var list = _db.GetAllDrinks();
+        foreach (var item in list)
+        {
+            Console.WriteLine($"{item.Value[0]} - {item.Value[1]}, цена {item.Value[2]}");
+        }
     }
 
     private static void ChooseCoffee(params string[] args)
@@ -130,7 +155,9 @@ public static class machineAPI
             else
             {
                 _choosedCoffee = choice;
-                Console.WriteLine("Вы выбрали кофе под номером " + _choosedCoffee);
+                string coffeeName = _db.GetDrink(_choosedCoffee)["drink_name"].ToString();
+                CreateOrder(coffeeName);
+                Console.WriteLine($"Ваш заказ: _order");
             }
         }
         catch (IndexOutOfRangeException e)
@@ -162,7 +189,8 @@ public static class machineAPI
             {
                 _supplements[supply] = value;
             }
-            GetSupply();
+            AddToOrder();
+            Console.WriteLine($"Ваш заказ: {_order}");
         }
         catch (IndexOutOfRangeException e)
         {
@@ -172,7 +200,16 @@ public static class machineAPI
 
     private static void ExecuteOrder(int coffeeType, Dictionary<string, int> supplyment, int money)
     {
-        _db.ExecuteOrder(coffeeType, supplyment, money);
+        int change = _db.ExecuteOrder(coffeeType, supplyment, money);
+        if (change >= 0)
+        {
+            Console.WriteLine($"Выдал: {_order}");
+            Console.WriteLine($"На счету: {change} рублей");
+        }
+        else
+        {
+            Console.WriteLine($"Не хватает {-change} рублей");
+        }
     }
 
     private static void AddMoney(string[] args)
