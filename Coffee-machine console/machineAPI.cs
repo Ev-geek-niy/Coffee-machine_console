@@ -266,12 +266,16 @@ public static class machineAPI
     private static void FillResource(string[] args)
     {
         string resourceName = args[0];
+        int.TryParse(args[1], out int value);
         try
         {
             if (!_resourceNames.Contains(resourceName))
                 throw new Exception("Такого ресурса нет в таблице");
 
-            _db.FillResource(resourceName);
+            if (value <= 0)
+                throw new Exception("Нельзя восполнить 0 или отрицательное значение");
+
+            _db.FillResource(resourceName, value);
         }
         catch (Exception e)
         {

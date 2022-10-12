@@ -257,15 +257,16 @@ public class DB
         }
     }
 
-    public void FillResource(string resourceName)
+    public void FillResource(string resourceName, int value)
     {
+        value = value > maxResValue ? maxResValue : value;
         _connection.Open();
         try
         {
             QueryBuilder qb = new QueryBuilder();
             string sql = qb.Table("resource")
                 .Update()
-                .Set("resource_value", this.maxResValue)
+                .Set("resource_value", value)
                 .Where("resource_name", resourceName)
                 .Sql();
             Console.WriteLine(sql);
