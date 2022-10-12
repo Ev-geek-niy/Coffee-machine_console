@@ -39,9 +39,9 @@ public static class machineAPI
         foreach (KeyValuePair<string, int> pair in _supplements)
         {
             if (pair.Key == "milk" && pair.Value != 0)
-                _order += $" плюс {pair.Value} молоко";
+                _order += $" плюс {pair.Value / 100} молоко";
             if (pair.Key == "sugar" && pair.Value != 0)
-                _order += $" плюс {pair.Value} сахар";
+                _order += $" плюс {pair.Value / 100} сахар";
         }
     }
 
@@ -128,7 +128,7 @@ public static class machineAPI
         var list = _db.GetAllDrinks();
         foreach (var item in list)
         {
-            Console.WriteLine($"{item.Value[0]} - {item.Value[1]}, цена {item.Value[2]}");
+            Console.WriteLine($"{item.Value[0]} - {item.Value[1]}, цена {item.Value[2]} рублей");
         }
     }
 
