@@ -1,13 +1,9 @@
-﻿using System;
-using System.Data.SqlClient;
+﻿namespace Coffee_machine_console;
 
-namespace Coffee_machine_console
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            machineAPI.Run();
-        }
+        machineAPI.Run();
     }
 }

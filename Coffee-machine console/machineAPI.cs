@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Coffee_machine_console.Wrappers;
-
-namespace Coffee_machine_console;
+﻿namespace Coffee_machine_console;
 
 public static class machineAPI
 {
