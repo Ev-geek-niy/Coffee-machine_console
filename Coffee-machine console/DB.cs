@@ -196,14 +196,12 @@ public class DB
         return null;
     }
 
-    public int ExecuteOrder(int coffeeType, Dictionary<string, int> supplyment, int money)
+    public void ExecuteOrder(int coffeeType, Dictionary<string, int> supplyment, int money)
     {
-        int change = -1;
         try
         {
             Dictionary<int, int> result = EvalCost(coffeeType, supplyment);
             int price = (int)GetDrink(coffeeType)["drink_price"];
-            change = money - price;
 
             _connection.Open();
 
@@ -219,7 +217,7 @@ public class DB
                 command.ExecuteNonQuery();
             }
 
-            CreateLog(new LogData(coffeeType, money));
+            CreateLog(new LogData(coffeeType, price));
         }
         catch (Exception e)
         {
@@ -229,8 +227,6 @@ public class DB
         {
             _connection.Close();
         }
-
-        return change;
     }
 
     public bool CheckResources(int coffeeType, Dictionary<string, int> supplyment)

@@ -203,12 +203,15 @@ public static class machineAPI
         {
             if (coffeeType == 0)
                 throw new Exception("Не выбран кофе");
-            if (money - (int)_db.GetDrink(coffeeType)["drink_price"] < 0)
-                throw new Exception("Не хватает денек");
+            
+            int bill = money - (int)_db.GetDrink(coffeeType)["drink_price"];
+            if (bill < 0)
+                throw new Exception($"Не хватает {-bill} денек");
+            
             if (!_db.CheckResources(coffeeType, supplyment))
                 throw new Exception("Не хватает ресов");
 
-            int bill = _db.ExecuteOrder(coffeeType, supplyment, money);
+            _db.ExecuteOrder(coffeeType, supplyment, money);
             _money = bill;
             Console.WriteLine($"Выдано: {_order}");
             Console.WriteLine($"На счету: {_money} рублей");
