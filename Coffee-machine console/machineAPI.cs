@@ -163,37 +163,32 @@ public static class machineAPI
     {
         try
         {
-            string supply = args[0];
-            int.TryParse(args[1], out int value);
-
-            int supplyValue = _db.GetResource(supply);
-
             if (_choosedCoffee <= 0)
-            {
-                Console.WriteLine("Не выбран кофе");
-            }
-            else if (value <= 0)
-            {
-                Console.WriteLine("Нельзя добавить нулевое или отрицательное значение");
-            }
-            else if (supplyValue - value < 0)
-            {
-                Console.WriteLine($"{supply} недостаточно");
-            }
-            else if (!_supplements.ContainsKey(supply))
-            {
-                Console.WriteLine("Добавки с таким именем не сущесвует, сейчас доступны: ");
-            }
-            else
-            {
-                _supplements[supply] += value * 100;
-                AddToOrder();
-                Console.WriteLine($"Ваш заказ: {_order}");
-            }
+                throw new Exception("Не выбран кофе");
+            
+            string supply = args[0];
+            if (!_supplements.ContainsKey(supply))
+                throw new Exception("Добавки с таким именем не сущесвует, сейчас доступны: ");
+            
+            int.TryParse(args[1], out int value);
+            if (value <= 0)
+                throw new Exception("Нельзя добавить нулевое или отрицательное значение");
+            
+            int tempValue = value * 100 + _supplements[supply];
+            int supplyValue = _db.GetResource(supply);
+            
+            
+            if (supplyValue - tempValue < 0)
+                throw new Exception($"{supply} недостаточно");
+            
+            
+            _supplements[supply] = tempValue;
+            AddToOrder();
+            Console.WriteLine($"Ваш заказ: {_order}");
         }
-        catch (IndexOutOfRangeException e)
+        catch (Exception e)
         {
-            Console.WriteLine("Не указаны параметры для добавок");
+            Console.WriteLine(e.Message);
         }
     }
 
