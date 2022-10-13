@@ -37,7 +37,7 @@ public static class machineAPI
     };
 
     //Принимает id напитка и формирует строку заказа, подставляя название из БД
-    public static void CreateOrder(int drinkNumber)
+    private static void CreateOrder(int drinkNumber)
     {
         string coffeeName = _db.GetDrink(drinkNumber)["drink_name"].ToString();
         _order = $"{coffeeName}";
@@ -45,7 +45,7 @@ public static class machineAPI
 
     //Добавление добавки для напитка
     //Проходит по словарю _supplements и добавляет к строке количество и тип добавки
-    public static void AddToOrder()
+    private static void AddToOrder()
     {
         CreateOrder(_choosedCoffee);
         foreach (KeyValuePair<string, int> pair in _supplements)
@@ -58,7 +58,7 @@ public static class machineAPI
     }
 
     //Получение в котором исчисляется тип ресурса
-    public static string GetResType(string resourceName)
+    private static string GetResType(string resourceName)
     {
         foreach (KeyValuePair<string, string[]> resourceType in _resourceTypes)
         {
