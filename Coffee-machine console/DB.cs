@@ -8,9 +8,9 @@ public class DB
     //Параметры для подключения к БД
     private string _dbParams = "Server=localhost;Database=Coffee_machine;Integrated Security=True";
     // Экземляр класса подключения к БД
-    private SqlConnection? _connection;
+    private SqlConnection _connection;
     //Максимально допустимое количество добавляемого ресурса
-    private int maxResValue = 1000;
+    private int _maxResValue = 1000;
 
 
     public DB()
@@ -294,7 +294,7 @@ public class DB
         _connection.Open();
         try
         {
-            value = value > maxResValue ? maxResValue : value;
+            value = value > _maxResValue ? _maxResValue : value;
             
             QueryBuilder qb = new QueryBuilder();
             string sql = qb.Table("resource")
@@ -302,7 +302,6 @@ public class DB
                 .Set("resource_value", value)
                 .Where("resource_name", resourceName)
                 .Sql();
-            Console.WriteLine(sql);
             SqlCommand command = new SqlCommand(sql, _connection);
             command.ExecuteNonQuery();
         }

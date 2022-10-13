@@ -244,11 +244,11 @@ public static class machineAPI
 
             //Проверка, что сдача не будет отрицательной
             if (bill < 0)
-                throw new Exception($"Не хватает {-bill} денек");
+                throw new Exception($"Не хватает на счету: {Math.Abs(bill)} рублей");
 
             //Проверка, что ресурсов из БД хватит для изготовления заказа
             if (!_db.CheckResources(coffeeType, supplyment))
-                throw new Exception("Не хватает ресов");
+                throw new Exception("Не хватает ресурсов");
 
             _db.ExecuteOrder(coffeeType, supplyment);
 
@@ -286,7 +286,7 @@ public static class machineAPI
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine(e.Message);
         }
     }
 
