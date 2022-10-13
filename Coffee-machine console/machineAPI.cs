@@ -2,20 +2,20 @@
 
 namespace Coffee_machine_console;
 
-public static class machineAPI
+public class MachineAPI
 {
     //Константсы
     //Экземляр БД
-    private static readonly DB _db = new DB();
+    private readonly DB _db = new DB();
 
     //Доступные номиналы валют
-    private static readonly int[] _currencyValues = { 1, 2, 5, 10, 50, 100, 200 };
+    private readonly int[] _currencyValues = { 1, 2, 5, 10, 50, 100, 200 };
 
     //Доступные ресурсы
-    private static readonly string[] _resourceNames = { "cup", "coffee", "water", "milk", "sugar" };
+    private readonly string[] _resourceNames = { "cup", "coffee", "water", "milk", "sugar" };
 
     //Определение в чем исчисляется ресурс
-    private static readonly Dictionary<string, string[]> _resourceTypes = new Dictionary<string, string[]>()
+    private readonly Dictionary<string, string[]> _resourceTypes = new Dictionary<string, string[]>()
     {
         ["литров"] = new[] { "milk", "water" },
         ["кг"] = new[] { "coffee", "sugar" },
@@ -23,23 +23,23 @@ public static class machineAPI
     };
 
     //Общее количество денег
-    private static int _money = 0;
+    private int _money = 0;
 
     //ID выбранного напитка
-    private static int _choosedCoffee = 0;
+    private int _choosedCoffee = 0;
 
     //Строка заказа
-    private static StringBuilder _order = new StringBuilder();
+    private StringBuilder _order = new StringBuilder();
 
     //Количество добавок
-    private static Dictionary<string, int> _supplements = new Dictionary<string, int>()
+    private Dictionary<string, int> _supplements = new Dictionary<string, int>()
     {
         ["milk"] = 0,
         ["sugar"] = 0,
     };
 
     //Принимает id напитка и формирует строку заказа, подставляя название из БД
-    private static void CreateOrder(int drinkNumber)
+    private void CreateOrder(int drinkNumber)
     {
         foreach (var pair in _supplements)
         {
@@ -52,7 +52,7 @@ public static class machineAPI
 
     //Добавление добавки для напитка
     //Проходит по словарю _supplements и добавляет к строке количество и тип добавки
-    private static void AddToOrder()
+    private void AddToOrder()
     {
         CreateOrder(_choosedCoffee);
         foreach (KeyValuePair<string, int> pair in _supplements)
@@ -65,7 +65,7 @@ public static class machineAPI
     }
 
     //Получение в котором исчисляется тип ресурса
-    private static string GetResType(string resourceName)
+    private string GetResType(string resourceName)
     {
         foreach (KeyValuePair<string, string[]> resourceType in _resourceTypes)
         {
@@ -77,7 +77,7 @@ public static class machineAPI
     }
 
     //Запуск приложения
-    public static void Run()
+    public void Run()
     {
         Console.WriteLine("Добро пожаловать!\nВведите help для показа всех команд\nВведите q, чтобы выйти");
         CommandListener();
@@ -85,7 +85,7 @@ public static class machineAPI
     }
 
     //Принимает строки пользователя и определяет какую команду необходимо выполнить
-    private static bool CommandListener()
+    private bool CommandListener()
     {
         while (true)
         {
@@ -129,19 +129,19 @@ public static class machineAPI
     }
 
     //Возвращает команду, равную первому слову из введенной строки
-    private static string GetCommand(string[] str)
+    private string GetCommand(string[] str)
     {
         return str[0];
     }
 
     //Возвращает массив аргументов, введенных после команды
-    private static string[] GetArgs(string[] str)
+    private string[] GetArgs(string[] str)
     {
         return str.Skip(1).ToArray();
     }
 
     //Вывод всех доступных команд с необходимыми аргументами
-    private static void Help()
+    private void Help()
     {
         Console.WriteLine("CoffeeList\nAddMoney [money]\nChooseCoffee [coffee number]\n" +
                           "AddInCoffee [sugar/milk] [count]\nExecuteOrder\nResourceAmount [resource name]\n" +
@@ -149,7 +149,7 @@ public static class machineAPI
     }
 
     //Вывод всех напитков из БД
-    private static void CoffeeList()
+    private void CoffeeList()
     {
         var allDrinks = _db.GetAllDrinks();
         foreach (var item in allDrinks)
@@ -160,7 +160,7 @@ public static class machineAPI
 
     //Выбор кофе
     //Аргументы: id напитка
-    private static void ChooseCoffee(params string[] args)
+    private void ChooseCoffee(params string[] args)
     {
         try
         {
@@ -191,7 +191,7 @@ public static class machineAPI
 
     //Добавка к кофе
     //Аргументы: название | количество
-    private static void AddInCoffee(params string[] args)
+    private void AddInCoffee(params string[] args)
     {
         try
         {
@@ -242,7 +242,7 @@ public static class machineAPI
     }
 
     //Выполнение заказа и выдача информации по заказу и счету
-    private static void ExecuteOrder(int coffeeType, Dictionary<string, int> supplyment, int money)
+    private void ExecuteOrder(int coffeeType, Dictionary<string, int> supplyment, int money)
     {
         try
         {
@@ -276,7 +276,7 @@ public static class machineAPI
 
     //Добавление средств и вывод информации о счете
     //Аргументы: номинал валюты
-    private static void AddMoney(string[] args)
+    private void AddMoney(string[] args)
     {
         try
         {
@@ -303,7 +303,7 @@ public static class machineAPI
 
     //Вывод доступного количества ресурса
     //Аргументы: название ресурса
-    private static void ResourceAmount(params string[] args)
+    private void ResourceAmount(params string[] args)
     {
         try
         {
@@ -341,7 +341,7 @@ public static class machineAPI
 
     //Добавление определенного количества выбранному ресурсу
     //Аргументы: название ресурса | количество
-    private static void FillResource(string[] args)
+    private void FillResource(string[] args)
     {
         try
         {

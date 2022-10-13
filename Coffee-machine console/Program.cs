@@ -4,6 +4,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        machineAPI.Run();
+        MachineAPI machine = new MachineAPI();
+        machine.Run();
     }
 }
