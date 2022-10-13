@@ -41,7 +41,10 @@ public static class machineAPI
     //Принимает id напитка и формирует строку заказа, подставляя название из БД
     private static void CreateOrder(int drinkNumber)
     {
-        
+        foreach (var pair in _supplements)
+        {
+            _supplements[pair.Key] = 0;
+        }
         string coffeeName = _db.GetDrink(drinkNumber)["drink_name"].ToString();
         _order.Remove(0, _order.Length);
         _order.Append($"{coffeeName}");
