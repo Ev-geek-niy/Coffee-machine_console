@@ -1,4 +1,6 @@
-﻿namespace Coffee_machine_console;
+﻿using System.Text;
+
+namespace Coffee_machine_console;
 
 public static class machineAPI
 {
@@ -7,10 +9,10 @@ public static class machineAPI
     private static readonly DB _db = new DB();
 
     //Доступные номиналы валют
-    private static readonly int[] _currencyValues = new[] { 1, 2, 5, 10, 50, 100, 200 };
+    private static readonly int[] _currencyValues = { 1, 2, 5, 10, 50, 100, 200 };
 
     //Доступные ресурсы
-    private static readonly string[] _resourceNames = new[] { "cup", "coffee", "water", "milk", "sugar" };
+    private static readonly string[] _resourceNames = { "cup", "coffee", "water", "milk", "sugar" };
 
     //Определение в чем исчисляется ресурс
     private static readonly Dictionary<string, string[]> _resourceTypes = new Dictionary<string, string[]>()
@@ -27,7 +29,7 @@ public static class machineAPI
     private static int _choosedCoffee = 0;
 
     //Строка заказа
-    private static string _order = "";
+    private static StringBuilder _order = new StringBuilder();
 
     //Количество добавок
     private static Dictionary<string, int> _supplements = new Dictionary<string, int>()
@@ -39,8 +41,10 @@ public static class machineAPI
     //Принимает id напитка и формирует строку заказа, подставляя название из БД
     private static void CreateOrder(int drinkNumber)
     {
+        
         string coffeeName = _db.GetDrink(drinkNumber)["drink_name"].ToString();
-        _order = $"{coffeeName}";
+        _order.Remove(0, _order.Length);
+        _order.Append($"{coffeeName}");
     }
 
     //Добавление добавки для напитка
@@ -51,9 +55,9 @@ public static class machineAPI
         foreach (KeyValuePair<string, int> pair in _supplements)
         {
             if (pair.Key == "milk" && pair.Value != 0)
-                _order += $" плюс {pair.Value / 100} молоко";
+                _order.Append($" плюс {pair.Value / 100} молоко");
             if (pair.Key == "sugar" && pair.Value != 0)
-                _order += $" плюс {pair.Value / 100} сахар";
+                _order.Append($" плюс {pair.Value / 100} сахар");
         }
     }
 
