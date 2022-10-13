@@ -1,0 +1,48 @@
+Create table drink (
+    drink_id int PRIMARY KEY IDENTITY(1, 1),
+    drink_name varchar(50) NOT NULL ,
+    drink_price int NOT NULL 
+);
+
+CREATE TABLE recipe (
+    recipe_id int PRIMARY KEY IDENTITY (1, 1),
+    recipe_drink_id int NOT NULL,
+    recipe_coffee int NOT NULL default 0,
+    recipe_water int NOT NULL default 0,
+    recipe_milk int NOT NULL default 0,
+    FOREIGN KEY (recipe_drink_id) REFERENCES drink(drink_id),
+);
+
+CREATE TABLE resource (
+    resource_id int PRIMARY KEY IDENTITY (1, 1),
+    resource_name varchar(50) NOT NULL,
+    resource_value int NOT NULL,
+    CONSTRAINT resourceMaxValue CHECK (resource_value BETWEEN 0 and 1001)
+);
+
+CREATE TABLE log (
+    log_id int PRIMARY KEY IDENTITY (1, 1),
+    log_drink_id int NOT NULL,
+    log_price int NOT NULL,
+    log_date datetime default GETDATE() NOT NULL,
+    FOREIGN KEY (log_drink_id) REFERENCES drink(drink_id)
+);
+
+INSERT INTO drink VALUES 
+                      ('Каппучино', '200'),
+                      ('Эспрессо', '150'),
+                      ('Латте', '300'),
+                      ('Американо', '100');
+
+INSERT INTO resource VALUES 
+                         ('cup', '100'),
+                         ('coffee', '1000'),
+                         ('water', '1000'),
+                         ('milk', '1000'),
+                         ('sugar', '1000');
+
+INSERT INTO recipe VALUES 
+                       ('1', '100', '100', '100'),
+                       ('2', '100', '100', '0'),
+                       ('3', '100', '100', '200'),
+                       ('4', '100', '200', '0');
