@@ -172,6 +172,10 @@ public static class machineAPI
 
             Console.WriteLine($"Ваш заказ: {_order}");
         }
+        catch (IndexOutOfRangeException e)
+        {
+            Console.WriteLine("Недостаточно аргументов");
+        }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
