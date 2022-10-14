@@ -334,7 +334,7 @@ public class DB
         return tempDict;
     }
 
-    //Рассчитывание стоимости
+    //Расчет стоимости
     //Объединяет полученный словарь добавок с рецептом выбранного кофе
     //Отнимает объедененный словарь из словаря с общим количеством ресурсов
     private Dictionary<int, int> EvalCost(int coffeeType, Dictionary<string, int> supplyment)

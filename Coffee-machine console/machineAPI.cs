@@ -4,7 +4,7 @@ namespace Coffee_machine_console;
 
 public class MachineAPI
 {
-    //Константсы
+    //Константы
     //Экземляр БД
     private readonly DB _db = new DB();
 
@@ -37,45 +37,7 @@ public class MachineAPI
         ["milk"] = 0,
         ["sugar"] = 0,
     };
-
-    //Принимает id напитка и формирует строку заказа, подставляя название из БД
-    private void CreateOrder(int drinkNumber)
-    {
-        foreach (var pair in _supplements)
-        {
-            _supplements[pair.Key] = 0;
-        }
-        string coffeeName = _db.GetDrink(drinkNumber)["drink_name"].ToString();
-        _order.Remove(0, _order.Length);
-        _order.Append($"{coffeeName}");
-    }
-
-    //Добавление добавки для напитка
-    //Проходит по словарю _supplements и добавляет к строке количество и тип добавки
-    private void AddToOrder()
-    {
-        CreateOrder(_choosedCoffee);
-        foreach (KeyValuePair<string, int> pair in _supplements)
-        {
-            if (pair.Key == "milk" && pair.Value != 0)
-                _order.Append($" плюс {pair.Value / 100} молоко");
-            if (pair.Key == "sugar" && pair.Value != 0)
-                _order.Append($" плюс {pair.Value / 100} сахар");
-        }
-    }
-
-    //Получение в котором исчисляется тип ресурса
-    private string GetResType(string resourceName)
-    {
-        foreach (KeyValuePair<string, string[]> resourceType in _resourceTypes)
-        {
-            if (resourceType.Value.Contains(resourceName))
-                return resourceType.Key;
-        }
-
-        return "";
-    }
-
+    
     //Запуск приложения
     public void Run()
     {
@@ -122,7 +84,7 @@ public class MachineAPI
                 case "q":
                     return false;
                 default:
-                    Console.WriteLine("Такой команды не сущесвует");
+                    Console.WriteLine("Такой команды не существует");
                     break;
             }
         }
@@ -138,6 +100,44 @@ public class MachineAPI
     private string[] GetArgs(string[] str)
     {
         return str.Skip(1).ToArray();
+    }
+    
+    //Принимает id напитка и формирует строку заказа, подставляя название из БД
+    private void CreateOrder(int drinkNumber)
+    {
+        foreach (var pair in _supplements)
+        {
+            _supplements[pair.Key] = 0;
+        }
+        string coffeeName = _db.GetDrink(drinkNumber)["drink_name"].ToString();
+        _order.Remove(0, _order.Length);
+        _order.Append($"{coffeeName}");
+    }
+
+    //Добавление добавки для напитка
+    //Проходит по словарю _supplements и добавляет к строке количество и тип добавки
+    private void AddToOrder()
+    {
+        CreateOrder(_choosedCoffee);
+        foreach (KeyValuePair<string, int> pair in _supplements)
+        {
+            if (pair.Key == "milk" && pair.Value != 0)
+                _order.Append($" плюс {pair.Value / 100} молоко");
+            if (pair.Key == "sugar" && pair.Value != 0)
+                _order.Append($" плюс {pair.Value / 100} сахар");
+        }
+    }
+
+    //Получение в котором исчисляется тип ресурса
+    private string GetResType(string resourceName)
+    {
+        foreach (KeyValuePair<string, string[]> resourceType in _resourceTypes)
+        {
+            if (resourceType.Value.Contains(resourceName))
+                return resourceType.Key;
+        }
+
+        return "";
     }
 
     //Вывод всех доступных команд с необходимыми аргументами
@@ -162,211 +162,218 @@ public class MachineAPI
     //Аргументы: id напитка
     private void ChooseCoffee(params string[] args)
     {
-        try
+        if (args.Length == 0)
         {
-            int.TryParse(args[0], out int choice);
-            int count = _db.GetDrinkCount();
-
-            //Проверка диапазона введенного id
-            if (choice <= 0 || choice > count)
-                throw new Exception(
-                    "Выбранного напитка не существует\nПосмотреть список напитков можно по команде CoffeeList");
-
-            //Запись id в свойство
-            _choosedCoffee = choice;
-            //Генерация строки заказа
-            CreateOrder(_choosedCoffee);
-
-            Console.WriteLine($"Ваш заказ: {_order}");
+            Console.WriteLine("Нет аргументов");
+            return;
         }
-        catch (IndexOutOfRangeException e)
+        
+        int.TryParse(args[0], out int choice);
+        int count = _db.GetDrinkCount();
+
+        //Проверка диапазона введенного id
+        if (choice <= 0 || choice > count)
         {
-            Console.WriteLine("Недостаточно аргументов");
+            Console.WriteLine(
+                "Выбранного напитка не существует\nПосмотреть список напитков можно по команде CoffeeList");
+            return;
         }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+
+        //Запись id в свойство
+        _choosedCoffee = choice;
+        //Генерация строки заказа
+        CreateOrder(_choosedCoffee);
+
+        Console.WriteLine($"Ваш заказ: {_order}");
     }
 
     //Добавка к кофе
     //Аргументы: название | количество
     private void AddInCoffee(params string[] args)
     {
-        try
+        if (args.Length == 0)
         {
-            //Проверка на наличие выбранного кофе
-            if (_choosedCoffee <= 0)
-                throw new Exception("Не выбран кофе");
-
-            //Получение названия добавки
-            string supply = args[0];
-
-            //Проверка на наличие в словаре _supplements
-            if (!_supplements.ContainsKey(supply))
-                throw new Exception("Добавки с таким именем не сущесвует, сейчас доступны: ");
-
-            //Получение количества добавки
-            //Если вместо числа будет введено слово value = 0
-            int.TryParse(args[1], out int value);
-
-            //Проверка на нулевые и отрицательные значения
-            if (value <= 0)
-                throw new Exception("Нельзя добавить нулевое или отрицательное значение");
-
-            //Получения итогового количества добавки
-            //Получение доступного количества из БД
-            int tempValue = value * 100 + _supplements[supply];
-            int supplyValue = _db.GetResource(supply);
-
-            //Проверка на доступность количества добавок
-            if (supplyValue - tempValue < 0)
-                throw new Exception($"{supply} недостаточно");
-
-            //Запись количества в словарь _supplements по выбранной добавке
-            _supplements[supply] = tempValue;
-
-            //Пересоздание строки заказа с обновленными параметрами добавок
-            AddToOrder();
-
-            Console.WriteLine($"Ваш заказ: {_order}");
+            Console.WriteLine("Нет аргументов");
+            return;
         }
-        catch (IndexOutOfRangeException e)
+        
+        //Проверка на наличие выбранного кофе
+        if (_choosedCoffee <= 0)
         {
-            Console.WriteLine("Недостаточно аргументов");
+            Console.WriteLine("Не выбран кофе");
+            return;
         }
-        catch (Exception e)
+
+        //Получение названия добавки
+        string supply = args[0];
+
+        //Проверка на наличие в словаре _supplements
+        if (!_supplements.ContainsKey(supply))
         {
-            Console.WriteLine(e.Message);
+            Console.WriteLine("Добавки с таким именем не сущесвует, сейчас доступны: ");
+            return;
         }
+
+        //Получение количества добавки
+        //Если вместо числа будет введено слово value = 0
+        int.TryParse(args[1], out int value);
+
+        //Проверка на нулевые и отрицательные значения
+        if (value <= 0)
+        {
+            Console.WriteLine("Нельзя добавить нулевое или отрицательное значение");
+            return;
+        }
+
+        //Получения итогового количества добавки
+        //Получение доступного количества из БД
+        int tempValue = value * 100 + _supplements[supply];
+        int supplyValue = _db.GetResource(supply);
+
+        //Проверка на доступность количества добавок
+        if (supplyValue - tempValue < 0)
+        {
+            Console.WriteLine($"{supply} недостаточно");
+            return;
+        }
+
+        //Запись количества в словарь _supplements по выбранной добавке
+        _supplements[supply] = tempValue;
+
+        //Пересоздание строки заказа с обновленными параметрами добавок
+        AddToOrder();
+
+        Console.WriteLine($"Ваш заказ: {_order}");
     }
 
     //Выполнение заказа и выдача информации по заказу и счету
     private void ExecuteOrder(int coffeeType, Dictionary<string, int> supplyment, int money)
     {
-        try
+        //Проверка на наличие выбранного кофе 
+        if (coffeeType == 0)
         {
-            //Проверка на наличие выбранного кофе 
-            if (coffeeType == 0)
-                throw new Exception("Не выбран кофе");
-
-            //Получение будущей сдачи при выполнении заказа
-            int bill = money - (int)_db.GetDrink(coffeeType)["drink_price"];
-
-            //Проверка, что сдача не будет отрицательной
-            if (bill < 0)
-                throw new Exception($"Не хватает на счету: {Math.Abs(bill)} рублей");
-
-            //Проверка, что ресурсов из БД хватит для изготовления заказа
-            if (!_db.CheckResources(coffeeType, supplyment))
-                throw new Exception("Не хватает ресурсов");
-
-            _db.ExecuteOrder(coffeeType, supplyment);
-
-            //Запись сдачи в доступные средства
-            _money = bill;
-            Console.WriteLine($"Выдано: {_order}");
-            Console.WriteLine($"На счету: {_money} рублей");
+            Console.WriteLine("Не выбран кофе");
+            return;
         }
-        catch (Exception e)
+
+        //Получение будущей сдачи при выполнении заказа
+        int bill = money - (int)_db.GetDrink(coffeeType)["drink_price"];
+
+        //Проверка, что сдача не будет отрицательной
+        if (bill < 0)
         {
-            Console.WriteLine(e.Message);
+            Console.WriteLine($"Не хватает на счету: {Math.Abs(bill)} рублей");
+            return;
         }
+
+        //Проверка, что ресурсов из БД хватит для изготовления заказа
+        if (!_db.CheckResources(coffeeType, supplyment))
+        {
+            Console.WriteLine("Не хватает ресурсов");
+            return;
+        }
+
+        _db.ExecuteOrder(coffeeType, supplyment);
+
+        //Запись сдачи в доступные средства
+        _money = bill;
+        Console.WriteLine($"Выдано: {_order}");
+        Console.WriteLine($"На счету: {_money} рублей");
     }
 
     //Добавление средств и вывод информации о счете
     //Аргументы: номинал валюты
     private void AddMoney(string[] args)
     {
-        try
+        if (args.Length == 0)
         {
-            //Получение количества внесенных средств
-            int.TryParse(args[0], out var money);
+            Console.WriteLine("Нет аргументов");
+            return;
+        }
+        
+        //Получение количества внесенных средств
+        int.TryParse(args[0], out var money);
 
-            //Проверка, что номинал существует
-            if (!_currencyValues.Contains(money))
-                throw new Exception("Валюты такого номинала не существует");
+        //Проверка, что номинал существует
+        if (!_currencyValues.Contains(money))
+        {
+            Console.WriteLine("Валюты такого номинала не существует");
+            return;
+        }
 
-            //Добавление средств в свойство
-            _money += money;
-            Console.WriteLine($"На счету: {_money} рублей");
-        }
-        catch (IndexOutOfRangeException e)
-        {
-            Console.WriteLine("Недостаточно аргументов");
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+        //Добавление средств в свойство
+        _money += money;
+        Console.WriteLine($"На счету: {_money} рублей");
     }
 
     //Вывод доступного количества ресурса
     //Аргументы: название ресурса
     private void ResourceAmount(params string[] args)
     {
-        try
+        if (args.Length == 0)
         {
-            //Получение названия ресурса
-            string resourceName = args[0];
-            
-            //Проверка на существования ресурса
-            if (!_resourceNames.Contains(resourceName))
-                throw new Exception("Такой ресурса нет в базе");
+            Console.WriteLine("Нет аргументов");
+            return;
+        }
+        
+        //Получение названия ресурса
+        string resourceName = args[0];
+        
+        //Проверка на существования ресурса
+        if (!_resourceNames.Contains(resourceName))
+        {
+            Console.WriteLine("Такой ресурса нет в базе");
+            return;
+        }
 
-            //Получение количества ресурса из базы данных
-            int value = _db.GetResource(resourceName);
-            
-            //Определения в чем исчисляется ресурс
-            string resType = GetResType(resourceName);
-            
-            //Конвертирование значения
-            double convertedValue = resourceName == "cup" ? value : value / 1000.0;
-            
-            //Проверка что ресурс не нулевой
-            if (convertedValue == 0)
-                throw new Exception($"{resourceName} закончился");
-            
-            Console.WriteLine($"Количество {resourceName}: {convertedValue} {resType}");
-        }
-        catch (IndexOutOfRangeException e)
+        //Получение количества ресурса из базы данных
+        int value = _db.GetResource(resourceName);
+        
+        //Определения в чем исчисляется ресурс
+        string resType = GetResType(resourceName);
+        
+        //Конвертирование значения
+        double convertedValue = resourceName == "cup" ? value : value / 1000.0;
+        
+        //Проверка что ресурс не нулевой
+        if (convertedValue == 0)
         {
-            Console.WriteLine("Недостаточно аргументов");
+            Console.WriteLine($"{resourceName} закончился");
+            return;
         }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+        
+        Console.WriteLine($"Количество {resourceName}: {convertedValue} {resType}");
     }
 
     //Добавление определенного количества выбранному ресурсу
     //Аргументы: название ресурса | количество
     private void FillResource(string[] args)
     {
-        try
+        if (args.Length == 0)
         {
-            //Получение названия ресурса
-            string resourceName = args[0];
-            //Получение количества, если нет = 0
-            int.TryParse(args[1], out int value);
-            
-            //Проверка на сущестсвование ресурса
-            if (!_resourceNames.Contains(resourceName))
-                throw new Exception("Такого ресурса нет в таблице");
+            Console.WriteLine("Нет аргументов");
+            return;
+        }
+        
+        //Получение названия ресурса
+        string resourceName = args[0];
+        //Получение количества, если нет = 0
+        int.TryParse(args[1], out int value);
+        
+        //Проверка на сущестсвование ресурса
+        if (!_resourceNames.Contains(resourceName))
+        {
+            Console.WriteLine("Такого ресурса нет в таблице");
+            return;
+        }
 
-            //Проверка, что значение не нулевое или отрицательное
-            if (value <= 0)
-                throw new Exception("Нельзя восполнить 0 или отрицательное значение");
+        //Проверка, что значение не нулевое или отрицательное
+        if (value <= 0)
+        {
+            Console.WriteLine("Нельзя восполнить 0 или отрицательное значение");
+            return;
+        }
 
-            _db.FillResource(resourceName, value);
-        }
-        catch (IndexOutOfRangeException e)
-        {
-            Console.WriteLine("Недостаточно аргументов");
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
+        _db.FillResource(resourceName, value);
     }
 }
