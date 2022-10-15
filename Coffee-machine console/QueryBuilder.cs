@@ -1,6 +1,4 @@
-﻿using Coffee_machine_console.Wrappers;
-
-namespace Coffee_machine_console;
+﻿namespace Coffee_machine_console;
 
 public class QueryBuilder
 {
@@ -40,11 +38,11 @@ public class QueryBuilder
         return this;
     }
 
-    public QueryBuilder Values(DbData obj)
-    {
-        this._sql += $" VALUES ({obj.getValuesSql()})";
-        return this;
-    }
+    // public QueryBuilder Values(DbData obj)
+    // {
+    //     this._sql += $" VALUES ({obj.getValuesSql()})";
+    //     return this;
+    // }
 
     public QueryBuilder Set<T>(string col, T value)
     {
