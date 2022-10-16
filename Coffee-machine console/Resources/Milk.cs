@@ -11,9 +11,4 @@ public class Milk : Resource
     public Milk(int value) : base(value)
     {
     }
-
-    public void Add(int value)
-    {
-        this.value += value;
-    }
 }

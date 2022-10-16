@@ -134,4 +134,28 @@ class DB
             _connection.Close();
         }
     }
+
+    public int FillResource(Resource resource)
+    {
+        _connection.Open();
+        try
+        {
+            string sql = qb.Table("resource")
+                .Update()
+                .Set("resource_value", resource.value)
+                .Where("resource_name", resource.GetType().Name.ToLower())
+                .Sql();
+            SqlCommand command = new SqlCommand(sql, _connection);
+            return command.ExecuteNonQuery();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        finally
+        {
+            _connection.Close();
+        }
+    }
 }

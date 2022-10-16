@@ -9,12 +9,14 @@ class MachineAPI
     private DB _db;
     private Order order;
     private PaymentCreator _paymentCreator;
+    private ResourceFactory _resourceFactory;
     private Payment _paymentMethod;
 
     public MachineAPI()
     {
         this._db = new DB();
         this._paymentCreator = new PaymentCreator();
+        this._resourceFactory = new ResourceFactory();
         this._paymentMethod = this._paymentCreator.CreatePaymentMethod("cash");
     }
 
@@ -48,14 +50,17 @@ class MachineAPI
                 case "ChooseCoffee":
                     SelectDrink(args);
                     break;
+                case "AddInCoffee":
+                    AddInCoffee(args);
+                    break;
                 case "AddMoney":
                     AddMoney(args);
                     break;
                 case "ResourceAmount":
                     ResourceAmount(args);
                     break;
-                case "AddInCoffee":
-                    AddInCoffee(args);
+                case "FillResource":
+                    FillResource(args);
                     break;
                 default:
                     Console.WriteLine("Такой команды не существует");
@@ -127,6 +132,25 @@ class MachineAPI
         string title = args[0];
         int resValue = _db.getResourceValue(title);
         Console.WriteLine(resValue);
+    }
+
+    /// <summary>
+    /// Заполнить определенный ресурс в базе данных
+    /// </summary>
+    /// <param name="args">Название ресурса. Количество ресурса.</param>
+    public void FillResource(params string[] args)
+    {
+        string title = args[0];
+        int.TryParse(args[1], out int value);
+
+        int resDBValue = _db.getResourceValue(title);
+        Resource resource = _resourceFactory.CreateResource(title, value + resDBValue);
+        int affected = _db.FillResource(resource);
+        
+        if (affected == 0)
+            Console.WriteLine("Такого ресурса нет или что-то пошло не так");
+        else
+            Console.WriteLine($"{title} успешно восполнен");
     }
 
     /// <summary>
