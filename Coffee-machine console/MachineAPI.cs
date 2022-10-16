@@ -1,4 +1,6 @@
-﻿using Coffee_machine_console.Resources;
+﻿using Coffee_machine_console.Factory;
+using Coffee_machine_console.PaymentMethods;
+using Coffee_machine_console.Resources;
 
 namespace Coffee_machine_console;
 
@@ -6,12 +8,14 @@ class MachineAPI
 {
     private DB _db;
     private Order order;
-    private int _money;
+    private PaymentCreator _paymentCreator;
+    private Payment _paymentMethod;
 
     public MachineAPI()
     {
         this._db = new DB();
-        _money = 0;
+        this._paymentCreator = new PaymentCreator();
+        this._paymentMethod = this._paymentCreator.CreatePaymentMethod("cash");
     }
 
     /// <summary>
@@ -43,6 +47,9 @@ class MachineAPI
                     break;
                 case "ChooseCoffee":
                     SelectDrink(args);
+                    break;
+                case "AddMoney":
+                    AddMoney(args);
                     break;
                 case "ResourceAmount":
                     ResourceAmount(args);
@@ -114,7 +121,7 @@ class MachineAPI
     /// <summary>
     /// Выводит количество ресурса из БД.
     /// </summary>
-    /// <param name="args">Название ресурса</param>
+    /// <param name="args">Название ресурса.</param>
     public void ResourceAmount(params string[] args)
     {
         string title = args[0];
@@ -135,6 +142,17 @@ class MachineAPI
         int.TryParse(args[1], out int value);
         order.AddToOrder(resourceType, value);
         order.PrintOrder();
+    }
+
+    /// <summary>
+    /// Добавить определенное количество средств.
+    /// </summary>
+    /// <param name="args">Количество средств.</param>
+    public void AddMoney(params  string[] args)
+    {
+        int.TryParse(args[0], out int value);
+        this._paymentMethod.Add(value);
+        this._paymentMethod.printFounds();
     }
 }
 
