@@ -1,5 +1,8 @@
 ﻿namespace Coffee_machine_console.Resources;
 
+/// <summary>
+/// Класс заказа.
+/// </summary>
 public class Order
 {
     public Drink drink;
@@ -12,15 +15,22 @@ public class Order
         
         this.drink = drink;
         this.addition = new Addition();
-        this.recipe = db.getRecipe(drink.id);
+        this.recipe = db.GetRecipe(drink.id);
     }
 
+    /// <summary>
+    /// Добавляет определенную добавку к заказу.
+    /// </summary>
+    /// <param name="resourceType">Тип добавки.</param>
+    /// <param name="value">Количество добавки.</param>
     public void AddToOrder(string resourceType, int value)
     {
         addition.Add(resourceType, value);
     }
 
-    
+    /// <summary>
+    /// Выводит информацию о заказе в консоль.
+    /// </summary>
     public void PrintOrder()
     {
         if (addition.milk.value > 0 && addition.sugar.value > 0)

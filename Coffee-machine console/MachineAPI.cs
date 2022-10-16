@@ -106,7 +106,7 @@ class MachineAPI
     /// </summary>
     private void CoffeeList()
     {
-        List<Drink> drinks = _db.getAllDrinks();
+        List<Drink> drinks = _db.GetAllDrinks();
         foreach (var drink in drinks)
             drink.printInfo();
     }
@@ -118,7 +118,7 @@ class MachineAPI
     private void SelectDrink(params string[] args)
     {
         int.TryParse(args[0], out int id);
-        Drink drink = _db.getDrink(id);
+        Drink drink = _db.GetDrink(id);
         this.order = new Order(drink);
         order.PrintOrder();
     }
@@ -130,7 +130,7 @@ class MachineAPI
     public void ResourceAmount(params string[] args)
     {
         string title = args[0];
-        int resValue = _db.getResourceValue(title);
+        int resValue = _db.GetResourceValue(title);
         Console.WriteLine(resValue);
     }
 
@@ -143,7 +143,7 @@ class MachineAPI
         string title = args[0];
         int.TryParse(args[1], out int value);
 
-        int resDBValue = _db.getResourceValue(title);
+        int resDBValue = _db.GetResourceValue(title);
         Resource resource = _resourceFactory.CreateResource(title, value + resDBValue);
         int affected = _db.FillResource(resource);
         

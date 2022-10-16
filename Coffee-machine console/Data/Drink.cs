@@ -1,5 +1,8 @@
 ﻿namespace Coffee_machine_console.Resources;
 
+/// <summary>
+/// Класс напитка.
+/// </summary>
 public class Drink
 {
     public int id { get; set; }
@@ -13,6 +16,9 @@ public class Drink
         this.price = price;
     }
 
+    /// <summary>
+    /// Выводит информацию о напитке в консоль.
+    /// </summary>
     public void printInfo()
     {
         Console.WriteLine($"{this.id} - {this.title}, цена: {this.price} рублей");

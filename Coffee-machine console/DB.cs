@@ -3,6 +3,9 @@ using Coffee_machine_console.Resources;
 
 namespace Coffee_machine_console;
 
+/// <summary>
+/// Класс базы данных.
+/// </summary>
 class DB
 {
     private static string sqlParams = "Server=localhost;Database=Coffee_machine;Trusted_Connection=true;";
@@ -15,7 +18,11 @@ class DB
         this.qb = new QueryBuilder();
     }
 
-    public List<Drink> getAllDrinks()
+    /// <summary>
+    /// Получает список всех напитков из БД.
+    /// </summary>
+    /// <returns>Список всех напитков.</returns>
+    public List<Drink> GetAllDrinks()
     {
         _connection.Open();
         try
@@ -44,7 +51,12 @@ class DB
         }
     }
 
-    public Drink getDrink(int id)
+    /// <summary>
+    /// Получает выбранный напиток из БД.
+    /// </summary>
+    /// <param name="id">ID напитка.</param>
+    /// <returns>Экземпляр класса Drink.</returns>
+    public Drink GetDrink(int id)
     {
         _connection.Open();
         try
@@ -73,7 +85,12 @@ class DB
         }
     }
 
-    public Recipe getRecipe(int drinkId)
+    /// <summary>
+    /// Получает рецепт напитка из БД.
+    /// </summary>
+    /// <param name="drinkId">ID напитка.</param>
+    /// <returns>Экземпляр класса Recipe.</returns>
+    public Recipe GetRecipe(int drinkId)
     {
         _connection.Open();
         try
@@ -106,7 +123,12 @@ class DB
         
     }
 
-    public int getResourceValue(string name)
+    /// <summary>
+    /// Получает значение выбранного ресурса из БД.
+    /// </summary>
+    /// <param name="name">Тип ресурса.</param>
+    /// <returns>Количество ресурса.</returns>
+    public int GetResourceValue(string name)
     {
         _connection.Open();
         try
@@ -135,6 +157,12 @@ class DB
         }
     }
 
+    /// <summary>
+    /// Заполняет выбранный ресурс в базе данных.
+    /// </summary>
+    /// <param name="resource">Экземпляр одного из наследников класса Resource
+    /// с необходимым количеством ресурса.</param>
+    /// <returns>Число строк, которые подверглись изменению</returns>
     public int FillResource(Resource resource)
     {
         _connection.Open();

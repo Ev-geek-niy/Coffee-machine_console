@@ -1,5 +1,8 @@
 ﻿namespace Coffee_machine_console.Resources;
 
+/// <summary>
+/// Класс молотого кофе.
+/// </summary>
 public class Coffee : Resource
 {
     public string valueType = "кг";

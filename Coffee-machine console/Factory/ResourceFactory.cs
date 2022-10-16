@@ -2,8 +2,21 @@
 
 namespace Coffee_machine_console.Factory;
 
+
+/// <summary>
+/// Класс фабрики ресурсов.
+/// </summary>
 public class ResourceFactory
 {
+    /// <summary>
+    /// Создает экземпляр класса определенного типа ресурса.
+    /// </summary>
+    /// <param name="type">Тип ресурса.</param>
+    /// <param name="value">Количество ресурса.</param>
+    /// <returns>
+    /// Экземпляр класса типа ресурса.
+    /// Если такого нет - null.
+    /// </returns>
     public Resource CreateResource(string type, int value)
     {
         switch (type)

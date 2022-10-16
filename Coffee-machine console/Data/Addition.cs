@@ -1,5 +1,8 @@
 ﻿namespace Coffee_machine_console.Resources;
 
+/// <summary>
+/// Класс добавки.
+/// </summary>
 public class Addition
 {
     public Milk milk;
@@ -11,6 +14,11 @@ public class Addition
         sugar = new Sugar();
     }
 
+    /// <summary>
+    /// Добавляет определенное количество выбранного типа добавки.
+    /// </summary>
+    /// <param name="resourceType">Тип добавки.</param>
+    /// <param name="value">Количество добавки.</param>
     public void Add(string resourceType, int value)
     {
         switch (resourceType)

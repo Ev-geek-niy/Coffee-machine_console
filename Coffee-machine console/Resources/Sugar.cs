@@ -1,5 +1,8 @@
 ﻿namespace Coffee_machine_console.Resources;
 
+/// <summary>
+/// Класс сахара.
+/// </summary>
 public class Sugar : Resource
 {
     public string valueType = "кг";
@@ -10,10 +13,5 @@ public class Sugar : Resource
 
     public Sugar(int value) : base(value)
     {
-    }
-    
-    public void Add(int value)
-    {
-        this.value += value;
     }
 }

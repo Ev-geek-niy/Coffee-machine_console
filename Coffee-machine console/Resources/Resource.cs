@@ -1,5 +1,9 @@
 ﻿namespace Coffee_machine_console.Resources;
 
+/// <summary>
+/// Класс ресурса.
+/// От него наследуются все базовые ресурсы.
+/// </summary>
 public abstract class Resource
 {
     public int value;
@@ -22,6 +26,10 @@ public abstract class Resource
         this.value = value;
     }
     
+    /// <summary>
+    /// Прибавляет определенное количество ресурса.
+    /// </summary>
+    /// <param name="value">Количество ресурса.</param>
     public virtual void Add(int value)
     {
         this.value += value;

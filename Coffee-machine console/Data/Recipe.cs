@@ -1,5 +1,8 @@
 ﻿namespace Coffee_machine_console.Resources;
 
+/// <summary>
+/// Класс рецепта напитка.
+/// </summary>
 public class Recipe
 {
     public Coffee coffee;
@@ -15,6 +18,9 @@ public class Recipe
         this.sugar = new Sugar(0);
     }
 
+    /// <summary>
+    /// Выводит рецепт напитка в консоль.
+    /// </summary>
     public void printRecipe()
     {
         Console.WriteLine($"coffee: {coffee.value}, water: {water.value}, milk: {milk.value}, sugar: {sugar.value}");
