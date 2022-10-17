@@ -117,8 +117,21 @@ class MachineAPI
     /// <param name="args">Id напитка</param>
     private void SelectDrink(params string[] args)
     {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Не хватает аргументов: ID напитка");
+            return;
+        }
+        
         int.TryParse(args[0], out int id);
         Drink drink = _db.GetDrink(id);
+
+        if (drink is null)
+        {
+            Console.WriteLine("Напитка с таким ID не существует");
+            return;
+        }
+        
         this.order = new Order(drink);
         order.PrintOrder();
     }
