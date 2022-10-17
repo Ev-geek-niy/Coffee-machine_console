@@ -199,8 +199,21 @@ class MachineAPI
     /// </param>
     public void AddInCoffee(params string[] args)
     {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Не хватает аргументов: название и количество ресурса");
+            return;
+        }
+        
         string resourceType = args[0];
         int.TryParse(args[1], out int value);
+
+        if (value <= 0)
+        {
+            Console.WriteLine("Количество не может быть отрицательным или равно нулю");
+            return;
+        }
+        
         order.AddToOrder(resourceType, value);
         order.PrintOrder();
     }
