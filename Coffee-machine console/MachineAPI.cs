@@ -25,9 +25,8 @@ class MachineAPI
     /// </summary>
     public void Run()
     {
-        Console.WriteLine("Добро пожаловать!\nВведите help для показа всех команд\nВведите q, чтобы выйти");
+        Console.WriteLine("Добро пожаловать!\n");
         CommandListener();
-        Console.WriteLine("Завершение работы");
     }
 
     /// <summary>
