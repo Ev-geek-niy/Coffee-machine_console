@@ -176,6 +176,12 @@ class MachineAPI
         
         string title = args[0];
         int.TryParse(args[1], out int value);
+        
+        if (value <= 0)
+        {
+            Console.WriteLine("Количество не может быть отрицательным или равно нулю");
+            return;
+        }
 
         //Получаем количество ресурса из БД.
         int resDBValue = _db.GetResourceValue(title);
