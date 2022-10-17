@@ -62,6 +62,9 @@ class MachineAPI
                 case "FillResource":
                     FillResource(args);
                     break;
+                case "ExecuteOrder":
+                    ExecuteOrder(order);
+                    break;
                 default:
                     Console.WriteLine("Такой команды не существует");
                     break;
@@ -233,6 +236,49 @@ class MachineAPI
         int.TryParse(args[0], out int value);
         this._paymentMethod.Add(value);
         this._paymentMethod.printFounds();
+    }
+
+    /// <summary>
+    /// Выполнение заказа.
+    /// После выполнения заказа выводит в консоль заказ и остаток на счету.
+    /// </summary>
+    /// <param name="order">Объект заказа.</param>
+    public void ExecuteOrder(Order order)
+    {
+        //TODO: очень плохо, переписать.
+        int[] orderRaw = order.createRawData();
+        int[] dbRaw = new[]
+        {
+            _db.GetResourceValue("cup"),
+            _db.GetResourceValue("coffee"),
+            _db.GetResourceValue("water"),
+            _db.GetResourceValue("milk"),
+            _db.GetResourceValue("sugar"),
+        };
+
+        for (int i = 0; i < dbRaw.Length; i++)
+        {
+            dbRaw[i] -= orderRaw[i];
+            if (dbRaw[i] < 0)
+            {
+                Console.WriteLine("Не хватает ресурсов");
+                return;
+            }
+        }
+
+        if (!_paymentMethod.CanPay(order))
+        {
+            Console.WriteLine("Недостаточно средств");
+            return;
+        };
+
+        _paymentMethod.Pay(order);
+        _db.ExecuteOrder(dbRaw);
+        _db.CreateLog(order);
+        
+        Console.WriteLine("Заказ успешно выполнен");
+        order.PrintOrder();
+        _paymentMethod.printFounds();
     }
 }
 

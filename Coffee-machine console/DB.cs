@@ -1,5 +1,7 @@
 ﻿using System.Data.SqlClient;
+using Coffee_machine_console.PaymentMethods;
 using Coffee_machine_console.Resources;
+using Coffee_machine_console.SqlWrappers;
 
 namespace Coffee_machine_console;
 
@@ -178,6 +180,56 @@ class DB
                 .Sql();
             SqlCommand command = new SqlCommand(sql, _connection);
             return command.ExecuteNonQuery();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        finally
+        {
+            _connection.Close();
+        }
+    }
+
+    public void ExecuteOrder(int[] cost)
+    {
+        _connection.Open();
+        try
+        {
+            string[] cols = new[] { "cup", "coffee", "water", "milk", "sugar" };
+            for (int i = 0; i < cols.Length; i++)
+            {
+                string sql = qb.Table("resource")
+                    .Update()
+                    .Set("resource_value", cost[i])
+                    .Where("resource_name", cols[i])
+                    .Sql();
+
+                SqlCommand command = new SqlCommand(sql, _connection);
+                command.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        finally
+        {
+            _connection.Close();
+        }
+    }
+
+    public void CreateLog(Order order)
+    {
+        _connection.Open();
+        try
+        {
+            DbData log = new LogData(order);
+            string sql = qb.Table("log").Insert("log_drink_id", "log_price").Values(log).Sql();
+            SqlCommand command = new SqlCommand(sql, _connection);
+            command.ExecuteNonQuery();
         }
         catch (Exception e)
         {

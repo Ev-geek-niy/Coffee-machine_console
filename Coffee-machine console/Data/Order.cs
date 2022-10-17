@@ -53,4 +53,16 @@ public class Order
             Console.WriteLine($"Ваш заказ: {drink.title}");
         }
     }
+
+    public int[] createRawData()
+    {
+        return new[]
+        {
+            1,
+            this.recipe.coffee.value,
+            this.recipe.water.value,
+            this.recipe.milk.value + this.addition.milk.value,
+            this.recipe.sugar.value + this.addition.sugar.value
+        };
+    }
 }
