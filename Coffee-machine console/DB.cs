@@ -192,6 +192,10 @@ class DB
         }
     }
 
+    /// <summary>
+    /// Отнимает из каждой строки материала требуемое значение.
+    /// </summary>
+    /// <param name="cost">Массив чисел, элемент которого соответствует строке в БД.</param>
     public void ExecuteOrder(int[] cost)
     {
         _connection.Open();
@@ -220,7 +224,11 @@ class DB
             _connection.Close();
         }
     }
-
+    
+    /// <summary>
+    /// Создание записи о заказе в БД.
+    /// </summary>
+    /// <param name="order">Объект заказа.</param>
     public void CreateLog(Order order)
     {
         _connection.Open();

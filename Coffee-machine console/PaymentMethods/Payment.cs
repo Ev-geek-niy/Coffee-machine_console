@@ -37,6 +37,14 @@ public abstract class Payment
         return totalFunds;
     }
 
+    /// <summary>
+    /// Проверка, что средств на счету хватит для оплаты заказа.
+    /// </summary>
+    /// <param name="order">Объект заказа</param>
+    /// <returns>
+    /// true - если полученное значение >= 0,
+    /// иначе - false.
+    /// </returns>
     public bool CanPay(Order order)
     {
         return totalFunds - order.drink.price >= 0;

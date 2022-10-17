@@ -2,6 +2,9 @@
 
 namespace Coffee_machine_console.SqlWrappers;
 
+/// <summary>
+/// Класс "обертки" для таблицы с логами о заказах.
+/// </summary>
 public class LogData : DbData
 {
     private readonly int _logDrinkId;
