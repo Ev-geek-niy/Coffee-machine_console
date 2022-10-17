@@ -142,8 +142,21 @@ class MachineAPI
     /// <param name="args">Название ресурса.</param>
     public void ResourceAmount(params string[] args)
     {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Не хватает аргументов: название ресурса");
+            return;
+        }
+        
         string title = args[0];
         int resValue = _db.GetResourceValue(title);
+
+        if (resValue == -1)
+        {
+            Console.WriteLine("Такого ресурса не существует");
+            return;
+        }
+        
         Console.WriteLine(resValue);
     }
 

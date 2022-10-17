@@ -127,7 +127,10 @@ class DB
     /// Получает значение выбранного ресурса из БД.
     /// </summary>
     /// <param name="name">Тип ресурса.</param>
-    /// <returns>Количество ресурса.</returns>
+    /// <returns>
+    /// Количество ресурса.
+    /// Если ресурса нет в БД, то возвращает -1.
+    /// </returns>
     public int GetResourceValue(string name)
     {
         _connection.Open();
