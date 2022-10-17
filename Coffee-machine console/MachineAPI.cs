@@ -161,15 +161,26 @@ class MachineAPI
     }
 
     /// <summary>
-    /// Заполнить определенный ресурс в базе данных
+    /// Заполнить определенный ресурс в базе данных на введенное значение.
     /// </summary>
-    /// <param name="args">Название ресурса. Количество ресурса.</param>
+    /// <param name="args">
+    /// Первый элемент массива - название ресурса.
+    /// Второй элемент массива - Количество ресурса.</param>
     public void FillResource(params string[] args)
     {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Не хватает аргументов: название и количество ресурса");
+            return;
+        }
+        
         string title = args[0];
         int.TryParse(args[1], out int value);
 
+        //Получаем количество ресурса из БД.
         int resDBValue = _db.GetResourceValue(title);
+        //Создаем объект ресурса, где значение будет равно:
+        //значение из БД + аргумент из строки.
         Resource resource = _resourceFactory.CreateResource(title, value + resDBValue);
         int affected = _db.FillResource(resource);
         
