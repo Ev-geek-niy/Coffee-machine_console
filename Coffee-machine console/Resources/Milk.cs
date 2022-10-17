@@ -5,7 +5,10 @@
 /// </summary>
 public class Milk : Resource
 {
-    public string valueType = "литров";
+    protected override string valueType
+    {
+        get => "литров";
+    }
 
     public Milk() : base()
     {

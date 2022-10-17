@@ -150,16 +150,17 @@ class MachineAPI
             return;
         }
         
-        string title = args[0];
-        int resValue = _db.GetResourceValue(title);
+        string name = args[0];
+        int resValue = _db.GetResourceValue(name);
 
         if (resValue == -1)
         {
             Console.WriteLine("Такого ресурса не существует");
             return;
         }
-        
-        Console.WriteLine(resValue);
+
+        Resource resource = _resourceFactory.CreateResource(name, resValue);
+        resource.PrintInfo();
     }
 
     /// <summary>

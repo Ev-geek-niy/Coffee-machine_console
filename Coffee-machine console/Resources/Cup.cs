@@ -5,7 +5,16 @@
 /// </summary>
 public class Cup : Resource
 {
-    private int delimeter = 1;
+    protected override string valueType
+    {
+        get => "штук";
+    }
+
+    protected override int delimeter
+    {
+        get => 1;
+    }
+
     public Cup() : base()
     {
     }
